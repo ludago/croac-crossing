@@ -71,7 +71,7 @@ croac-crossing/
 ### Run Locally
 ```bash
 # Clone the repository
-git clone https://github.com/TU_USUARIO/croac-crossing.git
+git clone https://github.com/ludago/croac-crossing.git
 cd croac-crossing
 
 # Open in Godot 4 → Press F5 (or click ▶ Play)
@@ -114,9 +114,9 @@ See [LICENSE](LICENSE) for details.
 
 ## 👨‍💻 Author
 
-**Tu Nombre / Tu Usuario**  
+**ludago**  
 🎮 First commercial indie project — built to learn, shipped to play.  
-🔗 [GitHub](https://github.com/TU_USUARIO) • [LinkedIn](https://linkedin.com/in/TU_USUARIO) • [Portfolio](https://tu-sitio.com)
+🔗 [GitHub](https://github.com/ludago) • [LinkedIn](https://linkedin.com/in/ludago) • [Portfolio](https://tu-sitio.com)
 
 ---
 
