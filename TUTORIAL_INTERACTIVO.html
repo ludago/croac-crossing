@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Croac Crossing - Tutorial Interactivo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #0a0a0a;
+            --card: #1a1a2e;
+            --card-hover: #16213e;
+            --accent: #4ecdc4;
+            --accent2: #ff6b6b;
+            --accent3: #ffe66d;
+            --text: #e0e0e0;
+            --text-dim: #888;
+            --correct: #2ecc71;
+            --wrong: #e74c3c;
+            --code-bg: #0d1117;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--accent);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234ecdc4' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: var(--accent);
+            text-shadow: 0 0 30px rgba(78, 205, 196, 0.3);
+            position: relative;
+        }
+
+        .header .frog-emoji { font-size: 1.5em; }
+
+        .header p {
+            color: var(--text-dim);
+            margin-top: 10px;
+            position: relative;
+        }
+
+        /* Progress bar */
+        .progress-container {
+            position: sticky;
+            top: 0;
+            background: #111;
+            padding: 10px 20px;
+            z-index: 100;
+            border-bottom: 1px solid #333;
+        }
+
+        .progress-bar {
+            display: flex;
+            gap: 4px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .progress-dot {
+            flex: 1;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            transition: background 0.3s;
+        }
+
+        .progress-dot.completed { background: var(--accent); }
+        .progress-dot.current { background: var(--accent3); animation: pulse 1.5s infinite; }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.8em;
+            color: var(--text-dim);
+            margin-top: 5px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .nav button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .nav button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+        }
+
+        .nav .prev { background: #333; color: white; }
+        .nav .next { background: var(--accent); color: #000; }
+
+        /* Modules */
+        .module {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .module-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            padding: 15px;
+            background: var(--card);
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+            transition: all 0.3s;
+        }
+
+        .module-header:hover { background: var(--card-hover); }
+
+        .module-number {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            color: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            flex-shrink: 0;
+        }
+
+        .module-title { font-size: 1.2em; flex: 1; }
+
+        .module-toggle {
+            font-size: 1.5em;
+            transition: transform 0.3s;
+        }
+
+        .module-header.open .module-toggle { transform: rotate(180deg); }
+
+        .module-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .module-content.open { max-height: 5000px; }
+
+        .section {
+            padding: 20px;
+            margin: 10px 0;
+            background: #111;
+            border-radius: 8px;
+            border: 1px solid #222;
+        }
+
+        .section h3 {
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .section p { margin-bottom: 12px; }
+
+        /* Code blocks */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            margin: 10px 0;
+            position: relative;
+        }
+
+        pre .comment { color: #6a737d; }
+        pre .keyword { color: #ff7b72; }
+        pre .string { color: #a5d6ff; }
+        pre .function { color: #d2a8ff; }
+        pre .number { color: #79c0ff; }
+
+        .code-label {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: var(--text-dim);
+            background: #21262d;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* Diagrams */
+        .diagram {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 0.85em;
+            line-height: 1.4;
+            white-space: pre;
+            overflow-x: auto;
+            color: var(--accent);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        th { color: var(--accent); font-weight: 600; }
+        tr:hover { background: #1a1a2e; }
+
+        /* Quiz */
+        .quiz {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid var(--accent3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .quiz h4 {
+            color: var(--accent3);
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .quiz-question {
+            margin-bottom: 20px;
+        }
+
+        .quiz-question p {
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .quiz-option {
+            padding: 10px 15px;
+            background: #111;
+            border: 2px solid #333;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quiz-option:hover { border-color: var(--accent); background: #1a1a2e; }
+        .quiz-option.selected { border-color: var(--accent); background: #1a2a3e; }
+        .quiz-option.correct { border-color: var(--correct); background: #1a2e1a; color: var(--correct); }
+        .quiz-option.wrong { border-color: var(--wrong); background: #2e1a1a; color: var(--wrong); }
+
+        .quiz-feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .quiz-feedback.show { display: block; }
+        .quiz-feedback.correct { background: #1a2e1a; color: var(--correct); }
+        .quiz-feedback.wrong { background: #2e1a1a; color: var(--wrong); }
+
+        /* Highlight box */
+        .highlight {
+            background: rgba(78, 205, 196, 0.1);
+            border-left: 3px solid var(--accent);
+            padding: 12px 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 10px 0;
+        }
+
+        .highlight.warning {
+            background: rgba(255, 107, 107, 0.1);
+            border-color: var(--accent2);
+        }
+
+        .highlight.tip {
+            background: rgba(255, 230, 109, 0.1);
+            border-color: var(--accent3);
+        }
+
+        /* Interactive elements */
+        .try-it {
+            background: rgba(78, 205, 196, 0.05);
+            border: 1px dashed var(--accent);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .try-it h5 {
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        /* Summary stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .stat {
+            background: var(--card);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat .number {
+            font-size: 1.8em;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .stat .label {
+            font-size: 0.8em;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .badge.easy { background: #1a3a1a; color: var(--correct); }
+        .badge.medium { background: #3a3a1a; color: var(--accent3); }
+        .badge.hard { background: #3a1a1a; color: var(--accent2); }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.8em; }
+            .nav { bottom: 10px; right: 10px; }
+            .nav button { width: 40px; height: 40px; }
+            .module { padding: 0 10px; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-dim);
+            font-size: 0.9em;
+            border-top: 1px solid #222;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1><span class="frog-emoji">🐸</span> Croac Crossing <span class="frog-emoji">🐸</span></h1>
+    <p>Tutorial Interactivo - Cómo hicimos nuestro juego con Godot 4.4</p>
+    <p style="margin-top: 5px; color: #4ecdc4;">Pixel Games Tucumán | Daniel Gómez</p>
+</div>
+
+<div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+        <div class="progress-text" id="progressText">0 de 10 módulos completados</div>
+        <div style="text-align:center; margin-top:5px;">
+            <button onclick="resetProgress()" style="background:none; border:1px solid #444; color:#888; padding:3px 10px; border-radius:4px; cursor:pointer; font-size:0.75em;">🗑️ Borrar progreso</button>
+        </div>
+</div>
+
+<div class="module" id="module0">
+    <div class="module-header" onclick="toggleModule(0)">
+        <div class="module-number" style="background:#ff6b6b;">0</div>
+        <div class="module-title">GDScript desde cero <span class="badge easy">Básico</span></div>
+        <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-content">
+        <div class="section fade-in">
+            <h3>¿Qué es GDScript?</h3>
+            <p>Es el lenguaje de programación que usa Godot. Es parecido a Python: fácil de leer, con pocas líneas. Todo el juego está escrito en GDScript.</p>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Variables: cajas para guardar datos</h3>
+            <pre><code><span class="code-label">variables</span>
+<span class="keyword">var</span> vidas = 5              <span class="comment"># Número entero</span>
+<span class="keyword">var</span> nombre = "Rana"        <span class="comment"># Texto (String)</span>
+<span class="keyword">var</span> esta_vivo = <span class="keyword">true</span>      <span class="comment"># Booleano (verdadero/falso)</span>
+<span class="keyword">var</span> velocidad = 3.5        <span class="comment"># Número decimal (float)</span>
+
+<span class="comment"># Con tipo explícito (mejor práctica):</span>
+<span class="keyword">var</span> lives: int = 5
+<span class="keyword">var</span> score: int = 0
+<span class="keyword">var</span> is_active: bool = <span class="keyword">false</span></code></pre>
+            <div class="highlight tip">
+                <strong>Tip:</strong> Las variables con <code>const</code> NO se pueden cambiar: <code>const MAX_LIVES = 5</code>
+            </div>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Funciones: bloques de código reutilizables</h3>
+            <pre><code><span class="code-label">funciones</span>
+<span class="keyword">func</span> <span class="function">saludar</span>():
+    print("¡Hola!")
+
+<span class="keyword">func</span> <span class="function">sumar</span>(a, b):
+    <span class="keyword">return</span> a + b  <span class="comment"># Devuelve el resultado</span>
+
+<span class="keyword">func</span> <span class="function">perder_vida</span>(vidas: int) -> int:
+    <span class="keyword">return</span> vidas - 1  <span class="comment">"-> int" significa que devuelve un número</span></code></pre>
+            <div class="highlight">
+                <strong>En nuestro juego:</strong> <code>func die()</code>, <code>func start_game()</code>, <code>func setup_level()</code> son funciones.
+            </div>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Condicionales: tomar decisiones</h3>
+            <pre><code><span class="code-label">if / else</span>
+<span class="keyword">if</span> vidas <= 0:
+    game_over()
+<span class="keyword">elif</span> vidas == 1:
+    print("¡Última vida!")
+<span class="keyword">else</span>:
+    print("Seguís vivo")
+
+<span class="code-label">Comparaciones:</span>
+==    igual a
+!=    distinto de
+>     mayor que
+<     menor que
+>=    mayor o igual
+<=    menor o igual</code></pre>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Loops: repetir cosas</h3>
+            <pre><code><span class="code-label">for loop</span>
+<span class="keyword">for</span> i <span class="keyword">in</span> range(5):     <span class="comment"># i = 0, 1, 2, 3, 4</span>
+    print(i)
+
+<span class="keyword">for</span> i <span class="keyword">in</span> range(3):     <span class="comment"># Crear 3 autos</span>
+    <span class="keyword">var</span> auto = crear_auto()
+    add_child(auto)
+
+<span class="code-label">while loop</span>
+<span class="keyword">while</span> vidas > 0:
+    esperar()</code></pre>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Arrays y Dictionaries</h3>
+            <pre><code><span class="code-label">Array (lista)</span>
+<span class="keyword">var</span> colores = ["rojo", "verde", "azul"]
+print(colores[0])  <span class="comment"># "rojo" (empieza en 0)</span>
+colores.append("amarillo")  <span class="comment"># Agregar elemento</span>
+
+<span class="code-label">Dictionary (diccionario)</span>
+<span class="keyword">var</span> persona = {
+    "nombre": "Daniel",
+    "edad": 25,
+    "ciudad": "Tucumán"
+}
+print(persona["nombre"])  <span class="comment"># "Daniel"</span>
+
+<span class="code-label">En nuestro juego:</span>
+<span class="keyword">return</span> {"lanes": 5, "speed": 160.0, "spawn_interval": 3.5}</code></pre>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Nodos: acceder al árbol del juego</h3>
+            <pre><code><span class="code-label">Nodos especiales de Godot</span>
+get_tree()           <span class="comment"># El árbol de escenas</span>
+get_parent()         <span class="comment"># El nodo padre</span>
+get_children()       <span class="comment"># Todos los hijos</span>
+get_node("Nombre")   <span class="comment"># Buscar un hijo por nombre</span>
+
+<span class="code-label">Ejemplo:</span>
+get_tree().paused = <span class="keyword">true</span>   <span class="comment"># Pausar el juego</span>
+get_tree().reload_current_scene()  <span class="comment"># Recargar escena</span></code></pre>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Señales: comunicar nodos</h3>
+            <pre><code><span class="code-label">1. Definir la señal</span>
+<span class="keyword">signal</span> mi_senal(parametro)
+
+<span class="code-label">2. Emitir (gritar)</span>
+mi_senal.emit(valor)
+
+<span class="code-label">3. Conectar (escuchar)</span>
+otro_nodo.mi_senal.connect(mi_funcion)
+
+<span class="code-label">4. Función que recibe</span>
+<span class="keyword">func</span> <span class="function">mi_funcion</span>(valor):
+    print(valor)</code></pre>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Funciones especiales de Godot</h3>
+            <table>
+                <tr><th>Función</th><th>Cuándo se ejecuta</th></tr>
+                <tr><td><code>_ready()</code></td><td>Cuando el nodo está listo (al inicio)</td></tr>
+                <tr><td><code>_process(delta)</code></td><td>Cada frame (60 veces por segundo)</td></tr>
+                <tr><td><code>_draw()</code></td><td>Cuando Godot dibuja el nodo</td></tr>
+                <tr><td><code>_on_*</code></td><td>Cuando ocurre un evento (botón, señal, etc)</td></tr>
+            </table>
+            <div class="highlight">
+                <strong>En nuestro juego:</strong> <code>_ready()</code> carga highscore, <code>_draw()</code> dibuja el fondo, <code>_on_touch_move()</code> mueve la rana.
+            </div>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Strings: textos</h3>
+            <pre><code><span class="code-label">Crear textos</span>
+<span class="keyword">var</span> nombre = "Croac Crossing"
+<span class="keyword">var</span> msg = 'Hola'   <span class="comment"># También con comillas simples</span>
+
+<span class="code-label">Concatenar (juntar)</span>
+<span class="keyword">var</span> texto = "VIDAS: " + str(vidas)
+<span class="comment"># str() convierte número a texto</span>
+<span class="comment"># Resultado: "VIDAS: 5"</span>
+
+<span class="code-label">Formato</span>
+<span class="keyword">var</span> texto = "Nivel %d - Puntos %d" % [nivel, puntos]
+<span class="comment"># Resultado: "Nivel 3 - Puntos 300"</span>
+
+<span class="code-label">Métodos útiles</span>
+texto.length()        <span class="comment"># Largo del texto</span>
+texto.to_upper()      <span class="comment"># TODO EN MAYÚSCULAS</span>
+texto.contains("hi")  <span class="comment"># ¿Contiene "hi"?</span></code></pre>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Tween: animaciones de valores</h3>
+            <pre><code><span class="code-label">Crear un tween (animación)</span>
+<span class="keyword">var</span> tween = create_tween()
+tween.tween_property(
+    sprite,           <span class="comment"># Qué objeto animar</span>
+    "modulate",       <span class="comment"># Qué propiedad</span>
+    Color.WHITE,      <span class="comment"># Valor final</span>
+    0.5               <span class="comment"># Duración en segundos</span>
+)
+
+<span class="code-label">En nuestro juego (flash rojo al morir):</span>
+sprite.modulate = Color(1, 0.3, 0.3)  <span class="comment"># Rojo</span>
+tween.tween_property(sprite, "modulate", Color.WHITE, 0.5)
+<span class="comment"># Vuelve a blanco en 0.5 segundos</span></code></pre>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Autoload: Singleton global</h3>
+            <pre><code><span class="code-label">¿Qué es?</span>
+Un script que existe SIEMPRE, en todas las escenas.
+Se accede por nombre desde cualquier lugar.
+
+<span class="code-label">Configurar en Godot:</span>
+Project → Project Settings → Autoload
+→ Agregar: "GameManager" = "res://scripts/autoload/game_manager.gd"
+
+<span class="code-label">Usar desde cualquier script:</span>
+GameManager.lives          <span class="comment"># Leer variable</span>
+GameManager.score = 100    <span class="comment"># Escribir variable</span>
+GameManager.lose_life()    <span class="comment"># Llamar función</span>
+GameManager.lives_changed.connect(mi_funcion)  <span class="comment"># Escuchar señal</span></code></pre>
+            <div class="highlight tip">
+                <strong>En nuestro juego:</strong> GameManager es el ÚNICO autoload. Controla todo: vidas, puntos, nivel, música, pausa.
+            </div>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Resumen rápido del lenguaje</h3>
+            <div class="stats">
+                <div class="stat">
+                    <div class="number" style="font-size:1.2em;">var</div>
+                    <div class="label">Crear variable</div>
+                </div>
+                <div class="stat">
+                    <div class="number" style="font-size:1.2em;">func</div>
+                    <div class="label">Crear función</div>
+                </div>
+                <div class="stat">
+                    <div class="number" style="font-size:1.2em;">if</div>
+                    <div class="label">Decisión</div>
+                </div>
+                <div class="stat">
+                    <div class="number" style="font-size:1.2em;">for</div>
+                    <div class="label">Repetir</div>
+                </div>
+                <div class="stat">
+                    <div class="number" style="font-size:1.2em;">signal</div>
+                    <div class="label">Comunicar</div>
+                </div>
+                <div class="stat">
+                    <div class="number" style="font-size:1.2em;">class</div>
+                    <div class="label">Tipo de nodo</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quiz">
+            <h4>🧪 Quiz del Módulo 0</h4>
+            <div class="quiz-question" data-correct="1">
+                <p>¿Qué palabra crea una variable en GDScript?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">func</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">var</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">let</div>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="quiz-question" data-correct="0">
+                <p>¿Qué hace <code>_ready()</code>?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">Se ejecuta cuando el nodo está listo</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">Dibuja en pantalla</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">Pausa el juego</div>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="quiz-question" data-correct="2">
+                <p>¿Cómo se emite una señal?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">signal.emit()</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">emit_signal()</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">mi_senal.emit()</div>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="module" id="module1">
+    <div class="module-header" onclick="toggleModule(1)">
+        <div class="module-number">1</div>
+        <div class="module-title">¿Qué es Godot? <span class="badge easy">Básico</span></div>
+        <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-content">
+        <div class="section fade-in">
+            <h3>Un motor de juegos es...</h3>
+            <p>Imaginate que querés construir una casa. Podrías hacer los ladrillos vos mismo, cortar la madera, fabricar el vidrio... o podrías comprar materiales ya hechos y enfocarte en diseñar la casa.</p>
+            <p>Un <strong>motor de juegos</strong> es como tener todos los materiales listos: dibujar imágenes, detectar choques, reproducir sonidos, manejar controles. Vos solo te enfocás en crear el juego.</p>
+            <div class="highlight">
+                <strong>Godot</strong> es gratuito, de código abierto, y es lo que usamos para Croac Crossing.
+            </div>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Los Nodos: las cajitas del juego</h3>
+            <p>En Godot, TODO es un <strong>nodo</strong>. Un nodo es una cajita que hace UNA cosa específica:</p>
+            <table>
+                <tr><th>Nodo</th><th>Qué hace</th><th>En nuestro juego</th></tr>
+                <tr><td><code>Node2D</code></td><td>Contenedor de objetos 2D</td><td>El fondo, el nivel</td></tr>
+                <tr><td><code>AnimatedSprite2D</code></td><td>Animaciones</td><td>La rana caminando/saltando</td></tr>
+                <tr><td><code>CharacterBody2D</code></td><td>Personaje con física</td><td>La rana</td></tr>
+                <tr><td><code>Area2D</code></td><td>Detecta cuando algo la toca</td><td>Los autos</td></tr>
+                <tr><td><code>CollisionShape2D</code></td><td>Forma de choque invisible</td><td>Rectángulos en rana y autos</td></tr>
+                <tr><td><code>AudioStreamPlayer</code></td><td>Reproduce sonido</td><td>Saltos, muerte, música</td></tr>
+                <tr><td><code>CanvasLayer</code></td><td>Capa encima del juego</td><td>HUD, pausa</td></tr>
+            </table>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Las Escenas: rompecabezas de nodos</h3>
+            <p>Una escena es un grupo de nodos juntos. La rana, por ejemplo:</p>
+            <div class="diagram">frog.tscn = CharacterBody2D
+  ├── AnimatedSprite2D  (sus animaciones)
+  ├── CollisionShape2D  (su forma de choque)
+  ├── JumpSound         (sonido de salto)
+  ├── DeathSound        (sonido de muerte)
+  └── CroakSound        (sonido de croac)</div>
+        </div>
+
+        <div class="quiz">
+            <h4>🧪 Quiz del Módulo 1</h4>
+            <div class="quiz-question" data-correct="1">
+                <p>¿Qué hace un CharacterBody2D?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">Reproduce sonidos</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">Es un personaje que se mueve y tiene físicas</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">Dibuja imágenes en pantalla</div>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="quiz-question" data-correct="2">
+                <p>¿Qué es una escena en Godot?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">Un archivo de sonido</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">Un script de código</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">Un grupo de nodos armados juntos</div>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="module" id="module2">
+    <div class="module-header" onclick="toggleModule(2)">
+        <div class="module-number">2</div>
+        <div class="module-title">El Fondo (main.gd) <span class="badge easy">Básico</span></div>
+        <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-content">
+        <div class="section fade-in">
+            <h3>Cómo se dibuja el fondo</h3>
+            <p>No usamos una imagen. Dibujamos rectángulos de colores con código:</p>
+            <div class="diagram">┌──────────────────────────┐
+│  ZONA SEGURA (verde) 🐸  │  ← Acá llega la rana
+├──────────────────────────┤
+│  VERDE (pasto)           │  ← Línea de inicio
+├──────────────────────────┤
+│  GRIS (avenida)         │  ← Donde circulan los autos
+│  GRIS (avenida)         │
+│  GRIS (avenida)         │
+├──────────────────────────┤
+│  VERDE (pasto)           │  ← Línea de la rana
+└──────────────────────────┘</div>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Explicación del código</h3>
+            <pre><code><span class="code-label">main.gd</span>
+<span class="keyword">extends</span> Node2D    <span class="comment"># "Soy un nodo 2D"</span>
+
+<span class="keyword">var</span> screen_width = 1280  <span class="comment"># Ancho en píxeles</span>
+<span class="keyword">var</span> screen_height = 720  <span class="comment"># Alto en píxeles</span>
+
+<span class="keyword">func</span> <span class="function">_draw</span>():
+    <span class="comment"># Rectángulo: Rect2(x, y, ancho, alto)</span>
+    <span class="comment"># Color: Color(r, g, b) de 0.0 a 1.0</span>
+    draw_rect(Rect2(0, 0, screen_width, 50),
+              Color(0.1, 0.1, 0.1))  <span class="comment"># Borde oscuro</span>
+    draw_rect(Rect2(0, 50, screen_width, 50),
+              Color(0.3, 0.7, 0.2))  <span class="comment"># Pasto verde</span></code></pre>
+            
+            <div class="highlight tip">
+                <strong>Tip:</strong> <code>var</code> crea una variable (una caja para guardar valores). <code>func</code> crea una función (un bloque de código que hace algo).
+            </div>
+        </div>
+
+        <div class="try-it">
+            <h5>🔬 Intentalo:</h5>
+            <p>En Godot, abrí <code>main.gd</code> y cambiá los números del Color. Por ejemplo: <code>Color(1, 0, 0)</code> = rojo. ¿Qué pasa?</p>
+        </div>
+
+        <div class="quiz">
+            <h4>🧪 Quiz del Módulo 2</h4>
+            <div class="quiz-question" data-correct="0">
+                <p>¿Qué dibuja la función _draw()?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">Rectángulos de colores</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">Imágenes PNG</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">Textos y números</div>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="module" id="module3">
+    <div class="module-header" onclick="toggleModule(3)">
+        <div class="module-number">3</div>
+        <div class="module-title">GameManager: El Cerebro <span class="badge medium">Importante</span></div>
+        <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-content">
+        <div class="section fade-in">
+            <h3>¿Qué es un Autoload?</h3>
+            <p>Un Autoload es un script que <strong>existe SIEMPRE</strong>, en todas las escenas. Es como un asistente que está en todos lados.</p>
+            <div class="highlight">
+                <strong>GameManager</strong> es nuestro único Autoload. Guarda vidas, puntos, nivel, y controla la música.
+            </div>
+        </div>
+
+        <div class="section fade-in">
+            <h3>¿Qué guarda?</h3>
+            <pre><code><span class="code-label">game_manager.gd</span>
+<span class="keyword">var</span> lives: int = 5          <span class="comment"># Vidas</span>
+<span class="keyword">var</span> score: int = 0          <span class="comment"># Puntos</span>
+<span class="keyword">var</span> current_level: int = 1  <span class="comment"># Nivel actual</span>
+<span class="keyword">var</span> is_game_active: bool = false  <span class="comment"># ¿Jugando?</span>
+<span class="keyword">var</span> high_score: int = 0     <span class="comment"># Mejor puntaje</span></code></pre>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Las Señales: el concepto MÁS IMPORTANTE 🔊</h3>
+            <p>Las señales son como <strong>megáfonos</strong>. Uno avisa, otros escuchan:</p>
+            
+            <div class="diagram">GameManager dice: "¡PERDÍ UNA VIDA!"
+    ↓ (señal: lives_changed)
+    ↓
+HUD escucha → Actualiza "VIDAS: 4" en pantalla
+    ↓
+Frog escucha → Se prepara para respawnear</div>
+
+            <pre><code><span class="code-label">Definir señal</span>
+<span class="keyword">signal</span> lives_changed(new_lives)
+
+<span class="code-label">Emitir (gritar)</span>
+lives_changed.<span class="function">emit</span>(lives)
+
+<span class="code-label">Escuchar (conectar)</span>
+GameManager.lives_changed.<span class="function">connect</span>(_on_lives_changed)</code></pre>
+
+            <div class="highlight tip">
+                <strong>Patrón clave:</strong> Definir → Emitir → Conectar → Escuchar
+            </div>
+        </div>
+
+        <div class="section fade-in">
+            <h3>La Dificultad</h3>
+            <table>
+                <tr><th>Nivel</th><th>Carriles</th><th>Velocidad</th><th>Intervalo</th></tr>
+                <tr><td>1-2</td><td>5</td><td>160 (lento)</td><td>3.5 seg</td></tr>
+                <tr><td>3-4</td><td>5</td><td>200 (medio)</td><td>2.8 seg</td></tr>
+                <tr><td>5-6</td><td>6</td><td>240 (rápido)</td><td>2.2 seg</td></tr>
+                <tr><td>7+</td><td>7</td><td>280 (máximo)</td><td>1.6 seg</td></tr>
+            </table>
+        </div>
+
+        <div class="quiz">
+            <h4>🧪 Quiz del Módulo 3</h4>
+            <div class="quiz-question" data-correct="1">
+                <p>¿Qué es una señal (signal)?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">Una función que se repite</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">Un aviso que otros pueden escuchar</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">Una variable especial</div>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="quiz-question" data-correct="2">
+                <p>¿Qué hace GameManager.start_game()?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">Dibuja el fondo</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">Crea los autos</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">Resetea vidas=5, puntos=0, nivel=1</div>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="module" id="module4">
+    <div class="module-header" onclick="toggleModule(4)">
+        <div class="module-number">4</div>
+        <div class="module-title">La Rana (frog.gd) <span class="badge medium">Importante</span></div>
+        <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-content">
+        <div class="section fade-in">
+            <h3>Movimiento por Grilla</h3>
+            <p>La rana NO se mueve libremente. Se mueve de a <strong>saltos de 64 píxeles</strong>:</p>
+            <div class="diagram">         ↑ (-64 Y)
+         |
+IZQ ←----+----→ DER
+         |
+         ↓ (+64 Y)
+
+Posición: (640, 640) → Salto arriba → (640, 576)</div>
+            <pre><code><span class="keyword">const</span> JUMP_DISTANCE = 64
+
+<span class="keyword">func</span> <span class="function">_on_touch_move</span>(direction: Vector2):
+    <span class="keyword">var</span> target = position + direction * JUMP_DISTANCE
+    target.x = clamp(target.x, 32, 1248)  <span class="comment"># No salir</span>
+    target.y = clamp(target.y, 32, 688)</code></pre>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Animaciones</h3>
+            <p>La rana tiene 3 hojas de sprites con 4 animaciones cada una:</p>
+            <div class="diagram">frog_idle_walk_sheet.png (2×4 frames)
+┌────┬────┐
+│idle│idle│  Quieta
+├────┼────┤
+│walk│walk│  Caminando
+├────┼────┤
+│jump│jump│  Saltando
+├────┼────┤
+│die │die │  Muriendo
+└────┴────┘</div>
+        </div>
+
+        <div class="section fade-in">
+            <h3>¿Cómo muere?</h3>
+            <pre><code><span class="keyword">func</span> <span class="function">die</span>():
+    is_dead = <span class="keyword">true</span>
+    sprite.play(<span class="string">"death"</span>)        <span class="comment"># Animación</span>
+    death_sound.play()           <span class="comment"># Sonido</span>
+    GameManager.lose_life()      <span class="comment"># Avisar</span>
+    
+    <span class="comment"># Flash rojo visual</span>
+    sprite.modulate = Color(1, 0.3, 0.3)
+    
+    <span class="comment"># Vibrar en celular</span>
+    <span class="keyword">if</span> OS.has_feature(<span class="string">"mobile"</span>):
+        Input.vibrate_handheld(200)
+    
+    <span class="comment"># Respawnear después de 1 segundo</span>
+    <span class="keyword">await</span> get_tree().create_timer(1.0).timeout
+    position = start_position</code></pre>
+        </div>
+
+        <div class="quiz">
+            <h4>🧪 Quiz del Módulo 4</h4>
+            <div class="quiz-question" data-correct="0">
+                <p>¿Cuántos píxeles se mueve la rana por salto?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">64 píxeles</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">100 píxeles</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">32 píxeles</div>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="module" id="module5">
+    <div class="module-header" onclick="toggleModule(5)">
+        <div class="module-number">5</div>
+        <div class="module-title">Los Vehículos <span class="badge easy">Básico</span></div>
+        <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-content">
+        <div class="section fade-in">
+            <h3>7 Tipos de Vehículos</h3>
+            <table>
+                <tr><th>Tipo</th><th>Velocidad</th><th>Tamaño</th></tr>
+                <tr><td>🚗 Auto</td><td>Normal (1.0x)</td><td>Mediano</td></tr>
+                <tr><td>🏎️ Deportivo</td><td>Rápido (1.2x)</td><td>Pequeño</td></tr>
+                <tr><td>🚌 Bus</td><td>Lento (0.6x)</td><td>Grande</td></tr>
+                <tr><td>🚛 Camión</td><td>Medio (0.8x)</td><td>Grande</td></tr>
+                <tr><td>🛻 Camioneta</td><td>Normal (1.0x)</td><td>Mediano</td></tr>
+                <tr><td>🚐 Combi</td><td>Normal (1.0x)</td><td>Grande</td></tr>
+                <tr><td>🏍️ Moto</td><td>Muy rápido (1.4x)</td><td>Pequeño</td></tr>
+            </table>
+        </div>
+
+        <div class="section fade-in">
+            <h3>El Spawner: máquina expendedora de autos</h3>
+            <pre><code><span class="keyword">var</span> vehicle_scene = preload(<span class="string">"res://car.tscn"</span>)
+
+<span class="keyword">func</span> <span class="function">_ready</span>():
+    <span class="comment"># Pre-cargar 2 autos al inicio</span>
+    <span class="keyword">for</span> i <span class="keyword">in</span> range(2):
+        <span class="keyword">var</span> vehicle = vehicle_scene.instantiate()
+        vehicle.position.x = randf_range(0, 1280)  <span class="comment"># Random</span>
+        add_child(vehicle)
+
+<span class="keyword">func</span> <span class="function">_spawn_vehicle</span>():
+    <span class="keyword">if</span> vehicles_in_lane >= MAX_VEHICLES:
+        <span class="keyword">return</span>  <span class="comment"># Máximo 3 autos por carril</span>
+    <span class="keyword">var</span> vehicle = vehicle_scene.instantiate()
+    add_child(vehicle)</code></pre>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Colisiones</h3>
+            <p>El auto es un <code>Area2D</code>. Cuando toca a la rana → <code>frog.die()</code>.</p>
+            <div class="highlight warning">
+                <strong>Capas:</strong> Rana = Capa 1 | Autos = Capa 2. El auto detecta cuando toca la Capa 1.
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="module" id="module6">
+    <div class="module-header" onclick="toggleModule(6)">
+        <div class="module-number">6</div>
+        <div class="module-title">El Nivel (level.gd) <span class="badge medium">Importante</span></div>
+        <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-content">
+        <div class="section fade-in">
+            <h3>Cómo se arma un nivel</h3>
+            <pre><code><span class="keyword">func</span> <span class="function">setup_level</span>():
+    <span class="comment"># 1. Obtener dificultad</span>
+    <span class="keyword">var</span> diff = GameManager.get_difficulty()
+    <span class="keyword">var</span> num_lanes = diff.lanes
+    
+    <span class="comment"># 2. Crear spawner por cada carril</span>
+    <span class="keyword">for</span> i <span class="keyword">in</span> range(num_lanes):
+        <span class="keyword">var</span> spawner = spawner_scene.instantiate()
+        spawner.setup(speed, direction, start_y + i * 64)
+        add_child(spawner)
+    
+    <span class="comment"># 3. Crear la rana abajo</span>
+    <span class="keyword">var</span> frog = frog_scene.instantiate()
+    frog.position = Vector2(640, 640)
+    add_child(frog)</code></pre>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Pasar de nivel</h3>
+            <div class="diagram">Rana llega arriba (zona segura)
+    ↓
+GameManager.next_level()
+    → nivel + 1
+    → +100 puntos
+    → Señal level_changed
+    ↓
+level.gd recarga carriles
+    → Nueva dificultad</div>
+        </div>
+    </div>
+</div>
+
+<div class="module" id="module7">
+    <div class="module-header" onclick="toggleModule(7)">
+        <div class="module-number">7</div>
+        <div class="module-title">La Interfaz (UI) <span class="badge easy">Básico</span></div>
+        <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-content">
+        <div class="section fade-in">
+            <h3>Capas (CanvasLayer)</h3>
+            <table>
+                <tr><th>Capa</th><th>Qué hay</th><th>¿Por qué?</th></tr>
+                <tr><td>10</td><td>HUD (vidas, puntos)</td><td>Siempre visible</td></tr>
+                <tr><td>20</td><td>Pausa, touch</td><td>Encima del juego</td></tr>
+                <tr><td>25</td><td>Opciones</td><td>Encima de todo</td></tr>
+                <tr><td>30</td><td>Transiciones</td><td>Lo último que se ve</td></tr>
+            </table>
+        </div>
+
+        <div class="section fade-in">
+            <h3>El HUD</h3>
+            <pre><code><span class="keyword">func</span> <span class="function">_ready</span>():
+    GameManager.lives_changed.<span class="function">connect</span>(_on_lives_changed)
+    GameManager.score_changed.<span class="function">connect</span>(_on_score_changed)
+
+<span class="keyword">func</span> <span class="function">_on_lives_changed</span>(new_lives):
+    livesLabel.text = <span class="string">"VIDAS: "</span> + str(new_lives)
+
+<span class="keyword">func</span> <span class="function">_on_game_over</span>():
+    gameOverPanel.visible = <span class="keyword">true</span></code></pre>
+        </div>
+
+        <div class="section fade-in">
+            <h3>La Pausa</h3>
+            <div class="highlight">
+                <code>process_mode = 3</code> significa "funciona aunque el juego esté pausado". ¡Por eso el menú de pausa se puede usar!
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="module" id="module8">
+    <div class="module-header" onclick="toggleModule(8)">
+        <div class="module-number">8</div>
+        <div class="module-title">Flujo Completo <span class="badge hard">Resumen</span></div>
+        <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-content">
+        <div class="section fade-in">
+            <h3>Todo junto</h3>
+            <div class="diagram">┌─────────────────────────────────────────────┐
+│              GAME MANAGER                   │
+│  (Autoload, existe siempre)                 │
+│                                             │
+│  Señales:                                   │
+│  ├── lives_changed  ──→ HUD actualiza       │
+│  ├── score_changed  ──→ HUD actualiza       │
+│  ├── level_changed  ──→ HUD + Level         │
+│  ├── game_over      ──→ HUD + Level         │
+│  └── touch_move     ──→ Frog se mueve       │
+└─────────────────────────────────────────────┘</div>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Flujo del juego</h3>
+            <pre><code><span class="number">1.</span> ARRANCA → start_screen.tscn (menú)
+<span class="number">2.</span> JUGAR → main.tscn (fondo + nodos)
+<span class="number">3.</span> GameManager.start_game() → vidas=5, puntos=0
+<span class="number">4.</span> Level crea carriles + autos + rana
+<span class="number">5.</span> Jugás → teclas → rana salta
+<span class="number">6.</span> Chocás auto → die() → lose_life()
+<span class="number">7.</span> Llegás arriba → next_level() → más difícil
+<span class="number">8.</span> 0 vidas → game_over → menú</code></pre>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Estadísticas del juego</h3>
+            <div class="stats">
+                <div class="stat">
+                    <div class="number">12</div>
+                    <div class="label">Scripts GDScript</div>
+                </div>
+                <div class="stat">
+                    <div class="number">989</div>
+                    <div class="label">Líneas de código</div>
+                </div>
+                <div class="stat">
+                    <div class="number">11</div>
+                    <div class="label">Escenas</div>
+                </div>
+                <div class="stat">
+                    <div class="number">25</div>
+                    <div class="label">Assets</div>
+                </div>
+                <div class="stat">
+                    <div class="number">50.5</div>
+                    <div class="label">MB APK</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quiz">
+            <h4>🧪 Quiz Final</h4>
+            <div class="quiz-question" data-correct="1">
+                <p>¿Cuál es la función más importante del GameManager?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">Dibujar el fondo</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">Manejar el estado global con señales</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">Crear los vehículos</div>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="quiz-question" data-correct="2">
+                <p>¿Qué pasa cuando la rana llega arriba?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">El juego termina</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">La rana muere</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">Pasa al siguiente nivel</div>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="module" id="module9">
+    <div class="module-header" onclick="toggleModule(9)">
+        <div class="module-number" style="background:#a855f7;">9</div>
+        <div class="module-title">Cheat Sheet: GDScript en nuestro juego <span class="badge hard">Referencia</span></div>
+        <div class="module-toggle">▼</div>
+    </div>
+    <div class="module-content">
+        <div class="section fade-in">
+            <h3>Variables → Dónde se usan</h3>
+            <table>
+                <tr><th>Concepto GDScript</th><th>En nuestro juego</th><th>Archivo</th></tr>
+                <tr><td><code>var</code> (variable)</td><td><code>var lives: int = 5</code></td><td>game_manager.gd:14</td></tr>
+                <tr><td><code>const</code> (constante)</td><td><code>const JUMP_DISTANCE = 64</code></td><td>frog.gd</td></tr>
+                <tr><td><code>var</code> con tipo</td><td><code>var score: int = 0</code></td><td>game_manager.gd:15</td></tr>
+                <tr><td><code>bool</code></td><td><code>var is_game_active: bool = false</code></td><td>game_manager.gd:17</td></tr>
+                <tr><td><code>String</code></td><td><code>var SAVE_PATH = "user://highscore.cfg"</code></td><td>game_manager.gd:34</td></tr>
+            </table>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Funciones → Dónde se usan</h3>
+            <table>
+                <tr><th>Concepto GDScript</th><th>En nuestro juego</th><th>Archivo</th></tr>
+                <tr><td><code>func</code></td><td><code>func die():</code></td><td>frog.gd</td></tr>
+                <tr><td>Parámetros</td><td><code>func setup(speed, dir, y):</code></td><td>vehicle_spawner.gd</td></tr>
+                <tr><td><code>-> tipo</code> (return)</td><td><code>func get_difficulty() -> Dictionary:</code></td><td>game_manager.gd:154</td></tr>
+                <tr><td><code>return</code></td><td><code>return {"lanes": 5, "speed": 160.0}</code></td><td>game_manager.gd:156</td></tr>
+            </table>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Condicionales → Dónde se usan</h3>
+            <table>
+                <tr><th>Concepto GDScript</th><th>En nuestro juego</th><th>Archivo</th></tr>
+                <tr><td><code>if</code></td><td><code>if lives <= 0:</code></td><td>game_manager.gd:108</td></tr>
+                <tr><td><code>elif</code></td><td><code>elif current_level <= 4:</code></td><td>game_manager.gd:157</td></tr>
+                <tr><td><code>else</code></td><td><code>else: return {"lanes": 7, "speed": 280.0}</code></td><td>game_manager.gd:162</td></tr>
+                <tr><td><code>if not</code></td><td><code>if not is_game_active: return</code></td><td>game_manager.gd:79</td></tr>
+            </table>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Loops → Dónde se usan</h3>
+            <table>
+                <tr><th>Concepto GDScript</th><th>En nuestro juego</th><th>Archivo</th></tr>
+                <tr><td><code>for i in range(n)</code></td><td><code>for i in range(num_lanes):</code></td><td>level.gd</td></tr>
+                <tr><td><code>for in</code></td><td><code>for i in range(2):</code> (pre-cargar autos)</td><td>vehicle_spawner.gd</td></tr>
+            </table>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Señales → Dónde se usan</h3>
+            <table>
+                <tr><th>Concepto GDScript</th><th>En nuestro juego</th><th>Archivo</th></tr>
+                <tr><td><code>signal</code> (definir)</td><td><code>signal lives_changed(new_lives)</code></td><td>game_manager.gd:3</td></tr>
+                <tr><td><code>.emit()</code></td><td><code>lives_changed.emit(lives)</code></td><td>game_manager.gd:71</td></tr>
+                <tr><td><code>.connect()</code></td><td><code>GameManager.lives_changed.connect(_on_lives)</code></td><td>hud.gd</td></tr>
+                <tr><td>Callback</td><td><code>func _on_lives_changed(new_lives):</code></td><td>hud.gd</td></tr>
+            </table>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Nodos especiales → Dónde se usan</h3>
+            <table>
+                <tr><th>Concepto GDScript</th><th>En nuestro juego</th><th>Archivo</th></tr>
+                <tr><td><code>_ready()</code></td><td>Carga highscore y settings al inicio</td><td>game_manager.gd:37</td></tr>
+                <tr><td><code>_draw()</code></td><td>Dibuja el fondo con rectángulos</td><td>main.gd</td></tr>
+                <tr><td><code>get_tree().paused</code></td><td>Pausar/reanudar el juego</td><td>game_manager.gd:82</td></tr>
+                <tr><td><code>change_scene_to_file()</code></td><td>Cambiar de menú a juego</td><td>start_screen.gd</td></tr>
+                <tr><td><code>add_child()</code></td><td>Agregar autos y rana al nivel</td><td>level.gd, vehicle_spawner.gd</td></tr>
+                <tr><td><code>create_tween()</code></td><td>Flash rojo al morir</td><td>frog.gd</td></tr>
+            </table>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Strings → Dónde se usan</h3>
+            <table>
+                <tr><th>Concepto GDScript</th><th>En nuestro juego</th><th>Archivo</th></tr>
+                <tr><td>Concatenar</td><td><code>"VIDAS: " + str(lives)</code></td><td>hud.gd</td></tr>
+                <tr><td><code>str()</code></td><td>Convertir número a texto para mostrar</td><td>hud.gd</td></tr>
+                <tr><td><code>load()</code></td><td><code>load("res://assets/sprites/...")</code></td><td>frog.gd, vehicle.gd</td></tr>
+            </table>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Dictionary → Dónde se usan</h3>
+            <table>
+                <tr><th>Concepto GDScript</th><th>En nuestro juego</th><th>Archivo</th></tr>
+                <tr><td>Crear dict</td><td><code>{"lanes": 5, "speed": 160.0}</code></td><td>game_manager.gd:156</td></tr>
+                <tr><td>Acceder</td><td><code>diff.lanes</code> o <code>diff["speed"]</code></td><td>level.gd</td></tr>
+            </table>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Autoload → Dónde se usa</h3>
+            <table>
+                <tr><th>Concepto GDScript</th><th>En nuestro juego</th><th>Archivo</th></tr>
+                <tr><td>Singleton global</td><td>GameManager (el cerebro)</td><td>game_manager.gd</td></tr>
+                <tr><td>Acceder</td><td><code>GameManager.lives</code></td><td>hud.gd, frog.gd, level.gd</td></tr>
+                <tr><td>Llamar función</td><td><code>GameManager.lose_life()</code></td><td>frog.gd</td></tr>
+                <tr><td>Escuchar señal</td><td><code>GameManager.game_over.connect(...)</code></td><td>hud.gd, level.gd</td></tr>
+            </table>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Archivos del juego (líneas de código)</h3>
+            <table>
+                <tr><th>Archivo</th><th>Líneas</th><th>Conceptos GDScript usados</th></tr>
+                <tr><td>game_manager.gd</td><td>186</td><td>var, const, func, signal, if/elif/else, Dictionary, ConfigFile</td></tr>
+                <tr><td>main.gd</td><td>101</td><td>extends, var, func _draw(), draw_rect(), Color, Rect2</td></tr>
+                <tr><td>level.gd</td><td>121</td><td>var, func, for loop, add_child(), get_difficulty()</td></tr>
+                <tr><td>frog.gd</td><td>150</td><td>var, func, if, const, await, create_tween(), clamp()</td></tr>
+                <tr><td>vehicle.gd</td><td>87</td><td>var, func, preload(), if, queue_free()</td></tr>
+                <tr><td>vehicle_spawner.gd</td><td>79</td><td>var, func, preload(), for loop, randf_range(), add_child()</td></tr>
+                <tr><td>hud.gd</td><td>69</td><td>func _ready(), .connect(), str(), .text = ...</td></tr>
+                <tr><td>start_screen.gd</td><td>42</td><td>func, change_scene_to_file(), OS.has_feature()</td></tr>
+                <tr><td>pause_menu.gd</td><td>39</td><td>func, GameManager.toggle_pause(), visible = ...</td></tr>
+                <tr><td>options_menu.gd</td><td>32</td><td>func, GameManager.set_music_enabled(), .text = ...</td></tr>
+                <tr><td>screen_transition.gd</td><td>45</td><td>func, create_tween(), tween_property(), Color</td></tr>
+                <tr><td>touch_controls.gd</td><td>28</td><td>func, GameManager.touch_move.emit(Vector2)</td></tr>
+                <tr style="background:#1a2e1a;"><td><strong>TOTAL</strong></td><td><strong>989</strong></td><td><strong>12 scripts, todos con GDScript</strong></td></tr>
+            </table>
+        </div>
+
+        <div class="section fade-in">
+            <h3>Flujo de una función típica</h3>
+            <pre><code><span class="comment"># Cuando la rana choca un auto:</span>
+
+<span class="number">1.</span> auto.gd detecta colisión con frog
+    ↓
+<span class="number">2.</span> auto llama: frog.die()
+    ↓
+<span class="number">3.</span> frog.die() ejecuta:
+    is_dead = <span class="keyword">true</span>           <span class="comment"># Variable</span>
+    sprite.play("death")     <span class="comment"># Método de nodo</span>
+    death_sound.play()       <span class="comment"># Método de nodo</span>
+    GameManager.lose_life()  <span class="comment"># Función de autoload</span>
+    ↓
+<span class="number">4.</span> GameManager.lose_life():
+    lives -= 1              <span class="comment"># Operación</span>
+    lives_changed.emit(lives) <span class="comment"># Señal</span>
+    ↓
+<span class="number">5.</span> HUD recibe señal:
+    _on_lives_changed(4)
+    livesLabel.text = "VIDAS: " + str(4)  <span class="comment"># String</span></code></pre>
+        </div>
+
+        <div class="quiz">
+            <h4>🧪 Quiz del Módulo 9</h4>
+            <div class="quiz-question" data-correct="2">
+                <p>¿En qué archivo se define <code>signal lives_changed</code>?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">frog.gd</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">hud.gd</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">game_manager.gd</div>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="quiz-question" data-correct="1">
+                <p>¿Qué función dibuja el fondo del juego?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">_ready()</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">_draw()</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">_process()</div>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+            <div class="quiz-question" data-correct="0">
+                <p>¿Cuántas líneas de código tiene todo el juego?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 0)">989 líneas</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1)">500 líneas</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2)">2000 líneas</div>
+                </div>
+                <div class="quiz-feedback"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <p>🐸 Croac Crossing - Pixel Games Tucumán 🐸</p>
+    <p>Tutorial interactivo para aprender desarrollo de juegos con Godot 4.4</p>
+    <p style="margin-top: 10px;">Programado por Daniel Gómez v1.0</p>
+</div>
+
+<div class="nav">
+    <button class="prev" onclick="navigate(-1)" title="Anterior">←</button>
+    <button class="next" onclick="navigate(1)" title="Siguiente">→</button>
+</div>
+
+<script>
+    let currentModule = 0;
+    const totalModules = 10;
+    let completedModules = new Set();
+    let answeredQuestions = {};
+
+    const STORAGE_KEY = 'croac_tutorial_progress';
+
+    function saveProgress() {
+        const data = {
+            currentModule,
+            completedModules: [...completedModules],
+            answeredQuestions
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function loadProgress() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        try {
+            const data = JSON.parse(raw);
+            currentModule = data.currentModule || 0;
+            completedModules = new Set(data.completedModules || []);
+            answeredQuestions = data.answeredQuestions || {};
+        } catch(e) {}
+    }
+
+    function resetProgress() {
+        if (!confirm('¿Borrar todo el progreso?')) return;
+        localStorage.removeItem(STORAGE_KEY);
+        completedModules = new Set();
+        answeredQuestions = {};
+        currentModule = 0;
+        document.querySelectorAll('.quiz-feedback').forEach(f => { f.className = 'quiz-feedback'; f.textContent = ''; });
+        document.querySelectorAll('.quiz-option').forEach(o => { o.className = 'quiz-option'; o.style.pointerEvents = ''; });
+        document.querySelectorAll('.module-content').forEach(c => c.classList.remove('open'));
+        document.querySelectorAll('.module-header').forEach(h => h.classList.remove('open'));
+        initProgress();
+        toggleModule(1);
+    }
+
+    // Initialize progress bar
+    function initProgress() {
+        const bar = document.getElementById('progressBar');
+        bar.innerHTML = '';
+        for (let i = 1; i <= totalModules; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'progress-dot';
+            dot.id = `dot${i}`;
+            bar.appendChild(dot);
+        }
+        updateProgress();
+    }
+
+    function updateProgress() {
+        for (let i = 1; i <= totalModules; i++) {
+            const dot = document.getElementById(`dot${i}`);
+            dot.className = 'progress-dot';
+            if (completedModules.has(i)) dot.classList.add('completed');
+            if (i === currentModule) dot.classList.add('current');
+        }
+        document.getElementById('progressText').textContent = 
+            `${completedModules.size} de ${totalModules} módulos completados`;
+        saveProgress();
+    }
+
+    function toggleModule(num) {
+        const content = document.querySelector(`#module${num} .module-content`);
+        const header = document.querySelector(`#module${num} .module-header`);
+        const isOpen = content.classList.contains('open');
+        
+        content.classList.toggle('open');
+        header.classList.toggle('open');
+        
+        if (!isOpen) {
+            currentModule = num;
+            updateProgress();
+            // Restore answered quizzes
+            restoreQuizState(num);
+            // Animate fade-in elements
+            setTimeout(() => {
+                content.querySelectorAll('.fade-in').forEach((el, i) => {
+                    setTimeout(() => el.classList.add('visible'), i * 100);
+                });
+            }, 100);
+        }
+    }
+
+    function restoreQuizState(moduleNum) {
+        const module = document.getElementById(`module${moduleNum}`);
+        module.querySelectorAll('.quiz-question').forEach((q, qi) => {
+            const key = `m${moduleNum}_q${qi}`;
+            const saved = answeredQuestions[key];
+            if (saved !== undefined) {
+                const options = q.querySelectorAll('.quiz-option');
+                const feedback = q.querySelector('.quiz-feedback');
+                options.forEach(o => o.style.pointerEvents = 'none');
+                options[saved.correct].classList.add('correct');
+                if (!saved.isCorrect) {
+                    options[saved.picked].classList.add('wrong');
+                    feedback.textContent = '❌ Incorrecto.';
+                    feedback.className = 'quiz-feedback show wrong';
+                } else {
+                    feedback.textContent = '✅ ¡Correcto!';
+                    feedback.className = 'quiz-feedback show correct';
+                }
+            }
+        });
+    }
+
+    function checkAnswer(option, index) {
+        const question = option.closest('.quiz-question');
+        const correct = parseInt(question.dataset.correct);
+        const feedback = question.querySelector('.quiz-feedback');
+        const options = question.querySelectorAll('.quiz-option');
+        
+        // Disable all options
+        options.forEach(o => o.style.pointerEvents = 'none');
+        
+        // Mark correct and wrong
+        options[correct].classList.add('correct');
+        const isCorrect = index === correct;
+        if (!isCorrect) {
+            option.classList.add('wrong');
+            feedback.textContent = '❌ Incorrecto. ¡Intentá de nuevo la próxima vez!';
+            feedback.className = 'quiz-feedback show wrong';
+        } else {
+            feedback.textContent = '✅ ¡Correcto! ¡Muy bien!';
+            feedback.className = 'quiz-feedback show correct';
+        }
+        
+        // Save answer
+        const moduleNum = question.closest('.module').id.replace('module', '');
+        const qIndex = [...question.parentElement.children].indexOf(question);
+        answeredQuestions[`m${moduleNum}_q${qIndex}`] = { picked: index, correct, isCorrect };
+        
+        // Check if module should be marked complete
+        const allCorrect = question.closest('.module-content')
+            .querySelectorAll('.quiz-question').length;
+        const answered = question.closest('.module-content')
+            .querySelectorAll('.quiz-feedback.show').length;
+        
+        if (answered >= allCorrect) {
+            completedModules.add(parseInt(moduleNum));
+        }
+        updateProgress();
+    }
+
+    function navigate(dir) {
+        let next = currentModule + dir;
+        if (next < 1) next = 1;
+        if (next > totalModules) next = totalModules;
+        
+        toggleModule(next);
+        document.getElementById(`module${next}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Initialize
+    loadProgress();
+    initProgress();
+    toggleModule(currentModule);
+</script>
+
+</body>
+</html>

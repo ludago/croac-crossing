@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/track/game.gd" id="1_game"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="2_hud"]
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_game")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(1.5, 1.5)
+position_smoothing_enabled = true
+position_smoothing_speed = 5.0
+
+[node name="HUD" parent="." instance=ExtResource("2_hud")]
+
+[node name="BackButton" type="Button" parent="HUD"]
+offset_left = 1100.0
+offset_top = 10.0
+offset_right = 1260.0
+offset_bottom = 40.0
+text = "Menú (ESC)"

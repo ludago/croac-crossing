@@ -1,0 +1,18 @@
+# Godot
+.godot/
+*.import
+
+# Build
+build/
+
+# Keystore (NUNCA subir a repositorios)
+*.keystore
+*.jks
+
+# Logs
+error_log.txt
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
