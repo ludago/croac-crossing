@@ -1,0 +1,49 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  godot-smoke:
+    name: Godot 4.4.1 headless
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.4.1
+          use-dotnet: false
+          include-templates: false
+
+      - name: Importar assets
+        # La primera pasada genera los .import de las imagenes.
+        run: godot --headless --import
+
+      - name: "Smoke test - cada escena carga sin errores"
+        # Croac Crossing no tiene tests unitarios todavia, asi que el smoke
+        # test carga cada escena unos frames: eso obliga a Godot a compilar
+        # los scripts adjuntos y delata referencias rotas o errores de sintaxis.
+        run: |
+          fallas=0
+          for escena in $(find res://scenes -name '*.tscn' | sort); do
+            nombre=$(basename "$escena" .tscn)
+            echo "--- $escena ---"
+            log="/tmp/$(echo "$nombre" | tr '/' '_').log"
+            godot --headless --quit-after 60 "$escena" 2>&1 | tee "$log"
+            if grep -E "SCRIPT ERROR|Parse Error|Failed to load|Invalid call|Compile Error" "$log"; then
+              echo "::error::La escena $escena tiene errores"
+              fallas=$((fallas + 1))
+            fi
+          done
+          if [ "$fallas" -ne 0 ]; then
+            echo "::error::$fallas escena(s) con errores"
+            exit 1
+          fi
+          echo "Todas las escenas cargan correctamente"

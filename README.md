@@ -3,6 +3,7 @@
 > A modern **Frogger-style arcade game** built with **Godot 4** — my debut project as a game developer.
 
 ![Godot](https://img.shields.io/badge/Godot-4.x-478CBF?logo=godotengine&logoColor=white)
+![Tests](https://github.com/ludago/croac-crossing/actions/workflows/ci.yml/badge.svg)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Android%20%7C%20Web-blue)
 ![Status](https://img.shields.io/badge/Status-Playable-brightgreen)
