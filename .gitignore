@@ -16,3 +16,6 @@ error_log.txt
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Proyectos que son repos independientes (tienen su propio .git)
+juegos_dev/DashRunner/
